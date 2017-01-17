@@ -1,56 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>Household builder</title>
-        <style>
-            .debug {
-                font-family: monospace;
-                border: 1px solid black;
-                padding: 10px;
-                display: none;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Household builder</h1>
-        <div class="builder">
-            <ol class="household"></ol>
-            <form>
-                <div>
-                    <label>Age
-                        <input type="text" name="age">
-                    </label>
-                </div>
-                <div>
-                    <label>Relationship
-                        <select name="rel">
-                            <option value="">---</option>
-                            <option value="self">Self</option>
-                            <option value="spouse">Spouse</option>
-                            <option value="child">Child</option>
-                            <option value="parent">Parent</option>
-                            <option value="grandparent">Grandparent</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </label>
-                </div>
-                <div>
-                    <label>Smoker?
-                        <input type="checkbox" name="smoker">
-                    </label>
-                </div>
-                <div>
-                    <button class="add">add</button>
-                </div>
-                <div>
-                    <button type="submit">submit</button>
-                </div>
-            </form>
-        </div>
-        <pre class="debug"></pre>
-        <script>
-            // your code goes here ...
-        </script>
-    </body>
+
+<head>
+    <meta charset="utf-8">
+    <title>Household builder</title>
+    <style>
+    .debug {
+        font-family: monospace;
+        border: 1px solid black;
+        padding: 10px;
+        display: none;
+    }
+    </style>
+</head>
+
+<body>
+    <h1>Household builder</h1>
+    <div class="builder">
+        <ol class="household"></ol>
+        <form>
+            <div>
+                <label>Age
+                    <input type="text" name="age">
+                </label>
+            </div>
+            <div>
+                <label>Relationship
+                    <select name="rel">
+                        <option value="">---</option>
+                        <option value="self">Self</option>
+                        <option value="spouse">Spouse</option>
+                        <option value="child">Child</option>
+                        <option value="parent">Parent</option>
+                        <option value="grandparent">Grandparent</option>
+                        <option value="other">Other</option>
+                    </select>
+                </label>
+            </div>
+            <div>
+                <label>Smoker?
+                    <input type="checkbox" name="smoker">
+                </label>
+            </div>
+            <div>
+                <button class="add">add</button>
+            </div>
+            <div>
+                <button type="submit">submit</button>
+            </div>
+        </form>
+    </div>
+    <pre class="debug"></pre>
+    <script>
+    'use strict';
+
+    // Household Container
+    var _household = [];
+
+    // Page Objects- Form Fields
+    var memberForm = document.querySelector('form');
+    var relField = document.querySelector('select[name="rel"]');
+    var ageField = document.querySelector('input[name="age"]');
+    var smokeField = document.querySelector('input[name="smoker"]');
+
+    // Page Objects - Buttons
+    var addButton = document.querySelector('button[class="add"]');
+    var submitButton = document.querySelector('button[type="submit"]');
+
+    // Page Objects - Tags
+    var preTag = document.querySelector('pre[class="debug"]');
+    var olTag = document.querySelector('ol[class="household"]');
+
+
+    // Add some In-Flight HTML Entertainment (element modifications)
+
+    addButton.setAttribute("onclick", "addNewMember(event)");
+    submitButton.setAttribute("onclick", "submitHousehold(event)");
+
+    // Add a Member to _household Array
+    function addNewMember(event) {
+        event.preventDefault();
+        var member = {
+            rel: relField.value,
+            age: ageField.value,
+            smoker: smokeField.checked
+        };
+        if (formValidate(member)) {
+            // Push to Array
+            _household.push(member);
+            memberForm.reset();
+            // Add to Household Display List
+            buildList();
+        }
+    };
+
+    // Submit Household
+    function submitHousehold(event) {
+        event.preventDefault();
+        preTag.innerHTML = ""
+        if (_household.length < 1) {
+            alert("HOUSEHOLD EMPTY! Add Members!");
+            preTag.setAttribute("style", "display: none");
+        } else {
+            var data = document.createTextNode(JSON.stringify(_household));
+            preTag.appendChild(data);
+            preTag.setAttribute("style", "display: block");
+            buildList();
+        }
+    };
+
+    // Form Validation
+    function formValidate(member) {
+        if (ageField.value == "" || ageField.value < 1) {
+            alert("ERROR: Please Enter a Valid Age");
+            ageField.focus();
+            return false;
+        }
+        if (isNaN(ageField.value)) {
+            alert("Error: Please enter a Number");
+            ageField.focus();
+            return false;
+        }
+        if (relField.value == "") {
+            alert("Error: Please Select a Relationship");
+            relField.focus();
+            return false;
+        }
+        return true;
+    };
+
+    // Show Members in a Dynamic List with Remove
+    function buildList() {
+
+        // Reset the List Contents or else...
+        olTag.innerHTML = ""
+
+        // Add member lines to household list
+        for (var i = 0; i < _household.length; i++) {
+            var entry = document.createElement('li');
+            var removeButton = document.createElement('button');
+            entry.appendChild(document.createTextNode(_household[i].rel + ",  "));
+            entry.appendChild(document.createTextNode("Age:  " + _household[i].age + ",  "));
+            entry.appendChild(document.createTextNode("Smoker:  " + _household[i].smoker + "  "));
+            removeButton.appendChild(document.createTextNode("Remove"));
+            removeButton.setAttribute('onClick', 'removeMember(' + i + ')');
+            entry.appendChild(removeButton);
+            olTag.appendChild(entry);
+        }
+    };
+
+    function removeMember(index) {
+        _household.splice(index, 1);
+        buildList();
+    };
+    </script>
+</body>
+
 </html>
